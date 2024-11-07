@@ -1,0 +1,273 @@
+-- Create users table
+CREATE TABLE users (
+    id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,
+    email VARCHAR(255) UNIQUE NOT NULL,
+    email_verified_at TIMESTAMP NULL,
+    password VARCHAR(255) NOT NULL,
+    remember_token VARCHAR(100) NULL,
+    created_at TIMESTAMP NULL DEFAULT NULL,
+    updated_at TIMESTAMP NULL DEFAULT NULL
+);
+
+-- Create password_reset_tokens table
+CREATE TABLE password_reset_tokens (
+    email VARCHAR(255) PRIMARY KEY,
+    token VARCHAR(255) NOT NULL,
+    created_at TIMESTAMP NULL
+);
+
+-- Create sessions table
+CREATE TABLE sessions (
+    id VARCHAR(255) PRIMARY KEY,
+    user_id BIGINT UNSIGNED NULL,
+    ip_address VARCHAR(45) NULL,
+    user_agent TEXT NULL,
+    payload LONGTEXT NOT NULL,
+    last_activity INT NOT NULL,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE SET NULL
+);
+
+-- Create cache table
+CREATE TABLE cache (
+    `key` VARCHAR(255) PRIMARY KEY,
+    value MEDIUMTEXT NOT NULL,
+    expiration INT NOT NULL
+);
+
+-- Create cache_locks table
+CREATE TABLE cache_locks (
+    `key` VARCHAR(255) PRIMARY KEY,
+    owner VARCHAR(255) NOT NULL,
+    expiration INT NOT NULL
+);
+
+-- Create jobs table
+CREATE TABLE jobs (
+    id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    queue VARCHAR(255) NOT NULL,
+    payload LONGTEXT NOT NULL,
+    attempts TINYINT UNSIGNED NOT NULL,
+    reserved_at INT UNSIGNED NULL,
+    available_at INT UNSIGNED NOT NULL,
+    created_at INT UNSIGNED NOT NULL
+);
+
+-- Create job_batches table
+CREATE TABLE job_batches (
+    id VARCHAR(255) PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,
+    total_jobs INT NOT NULL,
+    pending_jobs INT NOT NULL,
+    failed_jobs INT NOT NULL,
+    failed_job_ids LONGTEXT NOT NULL,
+    options MEDIUMTEXT NULL,
+    cancelled_at INT NULL,
+    created_at INT NOT NULL,
+    finished_at INT NULL
+);
+
+-- Create failed_jobs table
+CREATE TABLE failed_jobs (
+    id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    uuid VARCHAR(255) UNIQUE NOT NULL,
+    connection TEXT NOT NULL,
+    queue TEXT NOT NULL,
+    payload LONGTEXT NOT NULL,
+    exception LONGTEXT NOT NULL,
+    failed_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Create categories table
+CREATE TABLE categories (
+    category_id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    category_name VARCHAR(255) NOT NULL,
+    order_number INT NOT NULL,
+    category_status INT NOT NULL,
+    added_on DATETIME NOT NULL,
+    created_at TIMESTAMP NULL,
+    updated_at TIMESTAMP NULL
+);
+
+-- Create dishes table
+CREATE TABLE dishes (
+    dish_id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    category_id BIGINT UNSIGNED NOT NULL,
+    dish_name VARCHAR(255) NOT NULL,
+    dish_detail LONGTEXT NOT NULL,
+    dish_image TEXT NOT NULL,
+    dish_status INT NOT NULL,
+    full_price FLOAT(10, 2) NULL,
+    half_price FLOAT(10, 2) NULL,
+    created_at TIMESTAMP NULL,
+    updated_at TIMESTAMP NULL,
+    FOREIGN KEY (category_id) REFERENCES categories(category_id)
+);
+
+-- Create coupons table
+CREATE TABLE coupons (
+    coupon_id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    coupon_code VARCHAR(255) UNIQUE NOT NULL,
+    coupon_type INT NOT NULL,
+    coupon_value INT NOT NULL,
+    cart_min_value INT NOT NULL,
+    expired_on DATETIME NOT NULL,
+    coupon_status INT NOT NULL,
+    added_on DATETIME NOT NULL,
+    created_at TIMESTAMP NULL,
+    updated_at TIMESTAMP NULL,
+    dish_id BIGINT UNSIGNED,
+    FOREIGN KEY (dish_id) REFERENCES dishes(dish_id) ON DELETE CASCADE
+);
+
+-- Create carts table
+CREATE TABLE carts (
+    id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    created_at TIMESTAMP NULL,
+    updated_at TIMESTAMP NULL
+);
+
+-- Create check_outs table
+CREATE TABLE check_outs (
+    id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    created_at TIMESTAMP NULL,
+    updated_at TIMESTAMP NULL
+);
+
+-- Create customers table
+CREATE TABLE customers (
+    customer_id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,
+    email VARCHAR(255) UNIQUE NOT NULL,
+    phone_no VARCHAR(255) UNIQUE NOT NULL,
+    password VARCHAR(255) NOT NULL,
+    created_at TIMESTAMP NULL,
+    updated_at TIMESTAMP NULL
+);
+
+-- Create shippings table
+CREATE TABLE shippings (
+    id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,
+    email VARCHAR(255) NOT NULL,
+    phone_no VARCHAR(255) NOT NULL,
+    address TEXT NOT NULL,
+    created_at TIMESTAMP NULL,
+    updated_at TIMESTAMP NULL
+);
+
+-- Create orders table
+CREATE TABLE orders (
+    order_id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    customer_id BIGINT UNSIGNED NOT NULL,
+    shipping_id BIGINT UNSIGNED NOT NULL,
+    order_total FLOAT(10, 2) NOT NULL,
+    order_status VARCHAR(255) DEFAULT 'pending',
+    created_at TIMESTAMP NULL,
+    updated_at TIMESTAMP NULL,
+    FOREIGN KEY (customer_id) REFERENCES customers(customer_id) ON DELETE CASCADE,
+    FOREIGN KEY (shipping_id) REFERENCES shippings(id) ON DELETE CASCADE
+);
+
+-- Create payments table
+CREATE TABLE payments (
+    id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    order_id BIGINT UNSIGNED NOT NULL,
+    customer_id BIGINT UNSIGNED NOT NULL,
+    payment_type VARCHAR(255) NOT NULL,
+    order_status VARCHAR(255) DEFAULT 'pending',
+    created_at TIMESTAMP NULL,
+    updated_at TIMESTAMP NULL,
+    FOREIGN KEY (order_id) REFERENCES orders(order_id) ON DELETE CASCADE,
+    FOREIGN KEY (customer_id) REFERENCES customers(customer_id) ON DELETE CASCADE
+);
+
+-- Create order_details table
+CREATE TABLE order_details (
+    id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    order_id BIGINT UNSIGNED NOT NULL,
+    dish_id BIGINT UNSIGNED NOT NULL,
+    dish_name VARCHAR(255) NOT NULL,
+    dish_price FLOAT(10, 2) NOT NULL,
+    dish_qty INT NOT NULL,
+    created_at TIMESTAMP NULL,
+    updated_at TIMESTAMP NULL,
+    FOREIGN KEY (order_id) REFERENCES orders(order_id) ON DELETE CASCADE,
+    FOREIGN KEY (dish_id) REFERENCES dishes(dish_id) ON DELETE CASCADE
+);
+
+-- Create wishlists table
+CREATE TABLE wishlists (
+    id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    customer_id BIGINT UNSIGNED NOT NULL,
+    dish_id BIGINT UNSIGNED NOT NULL,
+    created_at TIMESTAMP NULL,
+    updated_at TIMESTAMP NULL,
+    FOREIGN KEY (customer_id) REFERENCES customers(customer_id) ON DELETE CASCADE,
+    FOREIGN KEY (dish_id) REFERENCES dishes(dish_id) ON DELETE CASCADE
+);
+
+-- Create ratings table
+CREATE TABLE ratings (
+    id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    customer_id BIGINT UNSIGNED NOT NULL,
+    dish_id BIGINT UNSIGNED NOT NULL,
+    rating INT NOT NULL,
+    review TEXT NULL,
+    created_at TIMESTAMP NULL,
+    updated_at TIMESTAMP NULL,
+    FOREIGN KEY (customer_id) REFERENCES customers(customer_id) ON DELETE CASCADE,
+    FOREIGN KEY (dish_id) REFERENCES dishes(dish_id) ON DELETE CASCADE
+);
+
+
+CREATE TABLE deliver_boys (
+    delivery_boy_id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    delivery_boy_name VARCHAR(255) NOT NULL,
+    delivery_boy_phone_number VARCHAR(255) UNIQUE NOT NULL,
+    delivery_boy_password VARCHAR(255) NOT NULL,
+    delivery_boy_status INT NOT NULL,
+    added_on DATETIME NOT NULL,
+    created_at TIMESTAMP NULL DEFAULT NULL,
+    updated_at TIMESTAMP NULL DEFAULT NULL
+);
+
+CREATE TABLE password_resets (
+    email VARCHAR(255) NOT NULL,
+    token VARCHAR(255) NOT NULL,
+    created_at TIMESTAMP NULL DEFAULT NULL,
+    INDEX (email)
+);
+
+CREATE TABLE admins (
+    id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,   -- Admin ID, Primary Key
+    name VARCHAR(255) NOT NULL,                      -- Admin name
+    email VARCHAR(255) NOT NULL UNIQUE,              -- Unique email
+    password VARCHAR(255) NOT NULL,                  -- Hashed password
+    created_at TIMESTAMP NULL DEFAULT NULL,          -- Timestamp for created_at
+    updated_at TIMESTAMP NULL DEFAULT NULL           -- Timestamp for updated_at
+);
+
+-- Insert Admin Record
+INSERT INTO admins (name, email, password, created_at, updated_at) 
+VALUES ('Admin1', 'admin@gmail.com', 'admin123', NOW(), NOW());
+
+-- Insert Customer Record
+INSERT INTO customers (customer_id, name, phone_no, email, password, created_at, updated_at) 
+VALUES (' ', 'Ali', '012-3456789', 'Ali@gmail.com', 'ali123', NOW(), NOW());
+
+-- Insert Category Record
+INSERT INTO categories (category_id, category_name, order_number, category_status, added_on, created_at, updated_at) 
+VALUES (' ', 'Meal', 1, 1, NOW(), NOW(), NOW());
+
+-- Insert Dish Record
+INSERT INTO dishes (dish_id, category_id, dish_name, dish_detail, dish_image, dish_status, full_price, half_price, created_at, updated_at) 
+VALUES (' ', 1, 'Pancakes', 'Is a pancakes', 'BackEndSourceFile/dish_img/pancakes.jpg', 1, 20, 10, NOW(), NOW());
+INSERT INTO dishes (dish_id, category_id, dish_name, dish_detail, dish_image, dish_status, full_price, half_price, created_at, updated_at) 
+VALUES (' ', 1, 'Stam', 'Is a stam', 'BackEndSourceFile/dish_img/stam.jpg', 1, 25, 18, NOW(), NOW());
+INSERT INTO dishes (dish_id, category_id, dish_name, dish_detail, dish_image, dish_status, full_price, half_price, created_at, updated_at) 
+VALUES (' ', 1, 'Spaghetti', 'Is a spaghetti', 'BackEndSourceFile/dish_img/spaghetti.jpg', 1, 30, 20, NOW(), NOW());
+INSERT INTO dishes (dish_id, category_id, dish_name, dish_detail, dish_image, dish_status, full_price, half_price, created_at, updated_at) 
+VALUES (' ', 1, 'Fruit Salad', 'Is a fruit salad', 'BackEndSourceFile/dish_img/fruitsalad.jpg', 1, 20, 10, NOW(), NOW());
+INSERT INTO dishes (dish_id, category_id, dish_name, dish_detail, dish_image, dish_status, full_price, half_price, created_at, updated_at) 
+VALUES (' ', 1, 'Burger', 'Is a burger', 'BackEndSourceFile/dish_img/burger.jpg', 1, 20, 10, NOW(), NOW());
