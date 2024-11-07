@@ -1,0 +1,9 @@
+<!ELEMENT orders (order+)>
+<!ELEMENT order (order_id, customer_name, order_total, order_status, order_date, payment_type, payment_status)>
+<!ELEMENT order_id (#PCDATA)>
+<!ELEMENT customer_name (#PCDATA)>
+<!ELEMENT order_total (#PCDATA)>
+<!ELEMENT order_status (#PCDATA)>
+<!ELEMENT order_date (#PCDATA)>
+<!ELEMENT payment_type (#PCDATA)>
+<!ELEMENT payment_status (#PCDATA)>
